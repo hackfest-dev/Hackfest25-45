@@ -8,6 +8,7 @@ load_dotenv()
 
 class GeminiEnhancer:
     def __init__(self):
+        
         self.api_key = os.getenv("GEMINI_API_KEY")
         self.endpoint = "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent"
 

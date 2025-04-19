@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Load the sensor data CSV
-sensor_data = pd.read_csv('AI_model/sensor.csv')
+sensor_data = pd.read_csv('AI_model\sensor.csv')
 
 # Drop the orientation columns
 sensor_data = sensor_data.drop(columns=['Orientation_x', 'Orientation_y', 'Orientation_z'])
