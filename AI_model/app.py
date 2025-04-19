@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import numpy as np
@@ -11,14 +12,15 @@ from typing import Dict
 # Load environment variables
 load_dotenv()
 HF_API_TOKEN = os.getenv("HF_API_TOKEN")
-GEMINI_API_KEY = "AIzaSyCOk7MFwGHQHY8u6uCqD5wX684p-WB7F9w "
+GEMINI_API_KEY = "AIzaSyCOk7MFwGHQHY8u6uCqD5wX684p-WB7F9w"
 
-# Load the pre-trained gesture model
+# Load the pre-trained gesture model (trained on 9 features per frame)
 model = load_model('AI_model/model.h5')
 unique_labels = ["hello", "thank you", "no gesture", "what", "your", "name"]
 
 # Constants
 SEQUENCE_LENGTH = 120  # Length of sequences for prediction
+FEATURES_PER_FRAME = 9  # accel (3) + gravity (3) + angular velocity (3)
 
 app = Flask(__name__)
 
@@ -122,14 +124,16 @@ text_enhancer = GeminiEnhancer()
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    """Endpoint for gesture prediction"""
+    """Endpoint for gesture prediction (using only 9 features per frame)"""
     data = request.get_json()
     new_data = data.get('sensor_data', [])
 
-    if len(new_data) != SEQUENCE_LENGTH * 12:
-        return jsonify({"error": f"Invalid data format, expected {SEQUENCE_LENGTH * 12} values, got {len(new_data)}."}), 400
+    expected_length = SEQUENCE_LENGTH * FEATURES_PER_FRAME
+    if len(new_data) != expected_length:
+        return jsonify({"error": f"Invalid data format, expected {expected_length} values, got {len(new_data)}."}), 400
     
-    data_buffer = np.array(new_data).reshape((1, SEQUENCE_LENGTH, 12))
+    # Reshape to (1, SEQUENCE_LENGTH, 9)
+    data_buffer = np.array(new_data).reshape((1, SEQUENCE_LENGTH, FEATURES_PER_FRAME))
 
     try:
         prediction = model.predict(data_buffer)
@@ -163,14 +167,14 @@ def enhance_text():
             
         return jsonify({
             "original": result["original"],
-            "grammar_corrected": result["grammar_corrected"],
             "tone_adjusted": result["tone_adjusted"],
+            "grammar_corrected": text,
             "success": True
         })
     except Exception as e:
         return jsonify({
             "error": f"Text enhancement failed: {str(e)}",
-            "original_text": text,
+
             "grammar_corrected": text,
             "tone_adjusted": text
         }), 500

@@ -8,7 +8,7 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.utils import to_categorical
 
 # Load your dataset
-data = pd.read_csv('AI_model/sensor.csv')  # Replace with your actual file path
+data = pd.read_csv('AI_model/sensor_r.csv')  # Replace with your actual file path
 
 # Step 1: Segment data into sequences
 # Assuming each segment lasts 3 seconds with a specific number of samples per segment
@@ -52,7 +52,7 @@ model.add(Dense(len(unique_labels), activation='softmax'))  # Adjust the number 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 # Step 7: Train the model
-history=model.fit(X_train, y_train, epochs=3, batch_size=32, validation_data=(X_test, y_test))
+history=model.fit(X_train, y_train, epochs=8, batch_size=32, validation_data=(X_test, y_test))
 
 # Step 8: Evaluate the model
 loss, accuracy = model.evaluate(X_test, y_test)

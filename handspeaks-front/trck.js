@@ -4,25 +4,63 @@ import { GLTFLoader } from 'GLTFLoader';
 const watch = new TouchSDK.Watch();
 const mainContent = document.createElement('main');
 
-// Configuration
+// Configuration with Apple design system and ElevenLabs integration
 const CONFIG = {
     sequenceLength: 120,
     inactivityTimeout: 3000,
     modelPath: '../3dmodel/arm.glb',
     apiEndpoint: 'http://127.0.0.1:5000',
     colors: {
-        primary: '#3498db',
-        secondary: '#2ecc71',
-        accent: '#e74c3c',
-        background: '#f5f5f5',
-        text: '#333333'
+        primary: '#007AFF',       // Apple Blue
+        primaryDark: '#0066CC',   // Darker Blue for pressed states
+        secondary: '#34C759',     // Apple Green
+        secondaryDark: '#2DBE4F', // Darker Green
+        accent: '#FF3B30',        // Apple Red
+        accentDark: '#E63329',    // Darker Red
+        background: '#F2F2F7',    // System Gray 6
+        cardBackground: '#FFFFFF', // White for cards
+        text: '#1C1C1E',          // Label
+        secondaryText: '#636366',  // Secondary Label
+        tertiaryText: '#AEAEB2',   // Tertiary Label
+        separator: '#D1D1D6',     // Separator
+        systemFill: '#78788033'    // System Fill with 20% opacity
     },
     tones: [
-        { id: 'friendly', label: 'Friendly', icon: '😊' },
-        { id: 'professional', label: 'Professional', icon: '📝' },
-        { id: 'casual', label: 'Casual', icon: '👕' },
-        { id: 'persuasive', label: 'Persuasive', icon: '💬' }
-    ]
+        { id: 'friendly', label: 'Friendly', icon: '😊', color: '#007AFF' },
+        { id: 'professional', label: 'Professional', icon: '📝', color: '#5856D6' },
+        { id: 'casual', label: 'Casual', icon: '👕', color: '#FF9500' },
+        { id: 'persuasive', label: 'Persuasive', icon: '💬', color: '#FF2D55' }
+    ],
+    typography: {
+        largeTitle: '28px',
+        title1: '22px',
+        title2: '20px',
+        title3: '18px',
+        headline: '17px',
+        body: '16px',
+        callout: '15px',
+        subhead: '14px',
+        footnote: '13px',
+        caption1: '12px',
+        caption2: '11px'
+    },
+    spacing: {
+        small: '8px',
+        medium: '16px',
+        large: '24px',
+        xLarge: '32px'
+    },
+    cornerRadius: {
+        small: '6px',
+        medium: '12px',
+        large: '16px'
+    },
+    elevenLabs: {
+        apiKey: 'sk_54a1f2fe7f949692dd39c14b33824298f75a8956d1d77554',
+        voiceId: '21m00Tcm4TlvDq8ikWAM', // Rachel voice
+        modelId: 'eleven_monolingual_v2',
+        apiEndpoint: 'https://api.elevenlabs.io/v1/text-to-speech'
+    }
 };
 
 // Application State
@@ -43,8 +81,27 @@ const appState = {
     scene: null,
     camera: null,
     renderer: null,
-    selectedTone: 'friendly'
+    selectedTone: 'friendly',
+    isSpeaking: false
 };
+
+// Helper function for Apple-style press animations
+function applyPressAnimation(element, darkColor) {
+    element.addEventListener('mousedown', () => {
+        element.style.transition = 'none';
+        element.style.backgroundColor = darkColor;
+    });
+    
+    element.addEventListener('mouseup', () => {
+        element.style.transition = 'background-color 0.3s ease';
+        element.style.backgroundColor = '';
+    });
+    
+    element.addEventListener('mouseleave', () => {
+        element.style.transition = 'background-color 0.3s ease';
+        element.style.backgroundColor = '';
+    });
+}
 
 // Initialize the application
 function initializeApp() {
@@ -54,25 +111,28 @@ function initializeApp() {
     startDataCollection();
 }
 
-// Set up the user interface
+// Set up the user interface with Apple design
 function setupUI() {
     // Reset body styles
     document.body.style.margin = '0';
     document.body.style.padding = '0';
-    document.body.style.fontFamily = "'Poppins', sans-serif";
+    document.body.style.fontFamily = "'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif";
     document.body.style.backgroundColor = CONFIG.colors.background;
     document.body.style.color = CONFIG.colors.text;
     document.body.style.minHeight = '100vh';
     document.body.style.display = 'flex';
     document.body.style.flexDirection = 'column';
+    document.body.style.overflowX = 'hidden';
 
-    // Create header
+    // Create header with Apple-style navigation bar
     const header = document.createElement('header');
     header.style.position = 'sticky';
     header.style.top = '0';
-    header.style.zIndex = '100';
-    header.style.backgroundColor = CONFIG.colors.background;
-    header.style.padding = '5px 0';
+    header.style.zIndex = '1000';
+    header.style.backgroundColor = 'rgba(242, 242, 247, 0.6)';
+    header.style.backdropFilter = 'blur(20px)';
+    header.style.padding = '12px 0';
+    header.style.borderBottom = `1px solid ${CONFIG.colors.separator}`;
     header.style.margin = '0';
     document.body.appendChild(header);
 
@@ -84,172 +144,268 @@ function setupUI() {
     headerContainer.style.width = '100%';
     headerContainer.style.maxWidth = '1200px';
     headerContainer.style.margin = '0 auto';
-    headerContainer.style.padding = '0 20px';
+    headerContainer.style.padding = `0 ${CONFIG.spacing.medium}`;
     header.appendChild(headerContainer);
 
-    // Title
+    // Title with Apple-style typography
     const title = document.createElement('h1');
-    title.textContent = 'REAL TIME GESTURE TRACKING';
+    title.textContent = 'Gesture Tracking';
     title.style.margin = '0';
     title.style.color = CONFIG.colors.text;
-    title.style.fontSize = '24px';
+    title.style.fontSize = CONFIG.typography.title3;
+    title.style.fontWeight = '600';
+    title.style.letterSpacing = '-0.2px';
 
-    // Connect Button
+    // Connect Button with Apple-style design
     const connectButton = watch.createConnectButton();
-    connectButton.style.backgroundColor = CONFIG.colors.secondary;
+    connectButton.style.backgroundColor = CONFIG.colors.primary;
     connectButton.style.color = 'white';
     connectButton.style.border = 'none';
-    connectButton.style.borderRadius = '25px';
-    connectButton.style.padding = '10px 20px';
-    connectButton.style.fontSize = '14px';
+    connectButton.style.borderRadius = CONFIG.cornerRadius.medium;
+    connectButton.style.padding = `${CONFIG.spacing.small} ${CONFIG.spacing.medium}`;
+    connectButton.style.fontSize = CONFIG.typography.subhead;
+    connectButton.style.fontWeight = '500';
     connectButton.style.cursor = 'pointer';
-    connectButton.style.transition = 'all 0.3s ease';
-    connectButton.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+    connectButton.style.transition = 'background-color 0.3s ease, transform 0.3s ease';
+    connectButton.style.boxShadow = 'none';
+    connectButton.style.webkitAppearance = 'none';
+    connectButton.style.fontFamily = 'inherit';
 
+    // Apple-style button interactions
     connectButton.addEventListener('mouseover', () => {
-        connectButton.style.transform = 'translateY(-2px)';
-        connectButton.style.boxShadow = '0 6px 8px rgba(0,0,0,0.15)';
+        connectButton.style.backgroundColor = CONFIG.colors.primaryDark;
     });
 
     connectButton.addEventListener('mouseout', () => {
-        connectButton.style.transform = 'translateY(0)';
-        connectButton.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+        connectButton.style.backgroundColor = CONFIG.colors.primary;
     });
 
     watch.addEventListener('connected', () => {
         connectButton.textContent = 'Connected';
-        connectButton.style.backgroundColor = '#27ae60';
-        connectButton.style.cursor = 'default';
+        connectButton.style.backgroundColor = CONFIG.colors.secondary;
+        connectButton.addEventListener('mouseover', () => {
+            connectButton.style.backgroundColor = CONFIG.colors.secondary;
+        });
     });
 
     headerContainer.appendChild(title);
     headerContainer.appendChild(connectButton);
 
-    // Main content
+    // Main content area
     const mainContent = document.createElement('main');
     mainContent.style.flex = '1';
     mainContent.style.width = '100%';
-    mainContent.style.padding = '0';
+    mainContent.style.padding = `${CONFIG.spacing.medium} 0`;
     mainContent.style.marginTop = '0';
     document.body.appendChild(mainContent);
 
-    // Center container
+    // Center container with Apple-style layout
     const container = document.createElement('div');
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
     container.style.alignItems = 'center';
-    container.style.gap = '20px';
+    container.style.gap = CONFIG.spacing.large;
     container.style.width = '100%';
     container.style.maxWidth = '1200px';
     container.style.margin = '0 auto';
+    container.style.padding = `0 ${CONFIG.spacing.medium}`;
     mainContent.appendChild(container);
 
-    // 3D Viewer Container
+    // 3D Viewer Container with Apple-style card
     const viewerContainer = document.createElement('div');
     viewerContainer.id = 'viewer-container';
     viewerContainer.style.width = '100%';
-    viewerContainer.style.height = '500px';
+    viewerContainer.style.height = '400px';
     viewerContainer.style.backgroundColor = '#000';
-    viewerContainer.style.borderRadius = '15px';
+    viewerContainer.style.borderRadius = CONFIG.cornerRadius.large;
     viewerContainer.style.overflow = 'hidden';
-    viewerContainer.style.boxShadow = '0 8px 20px rgba(0,0,0,0.1)';
+    viewerContainer.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
     container.appendChild(viewerContainer);
 
-    // Tone Selection Menu
+    // Tone Selection Menu with Apple-style segmented control
     const toneMenuContainer = document.createElement('div');
     toneMenuContainer.style.width = '100%';
     toneMenuContainer.style.display = 'flex';
     toneMenuContainer.style.flexDirection = 'column';
-    toneMenuContainer.style.gap = '10px';
+    toneMenuContainer.style.gap = CONFIG.spacing.small;
     
     const toneLabel = document.createElement('div');
-    toneLabel.textContent = 'Select Tone:';
-    toneLabel.style.fontWeight = 'bold';
-    toneLabel.style.fontSize = '16px';
+    toneLabel.textContent = 'SELECT TONE';
+    toneLabel.style.fontWeight = '600';
+    toneLabel.style.fontSize = CONFIG.typography.footnote;
+    toneLabel.style.color = CONFIG.colors.secondaryText;
+    toneLabel.style.letterSpacing = '0.5px';
+    toneLabel.style.textTransform = 'uppercase';
     toneMenuContainer.appendChild(toneLabel);
     
     const toneButtonsContainer = document.createElement('div');
     toneButtonsContainer.style.display = 'flex';
-    toneButtonsContainer.style.gap = '10px';
+    toneButtonsContainer.style.gap = CONFIG.spacing.small;
     toneButtonsContainer.style.flexWrap = 'wrap';
+    toneButtonsContainer.style.width = '100%';
     
-    CONFIG.tones.forEach(tone => {
-        const toneButton = document.createElement('button');
-        toneButton.textContent = `${tone.icon} ${tone.label}`;
-        toneButton.dataset.tone = tone.id;
-        toneButton.style.padding = '8px 12px';
-        toneButton.style.borderRadius = '20px';
-        toneButton.style.border = '1px solid #ddd';
-        toneButton.style.backgroundColor = appState.selectedTone === tone.id ? CONFIG.colors.primary : 'white';
-        toneButton.style.color = appState.selectedTone === tone.id ? 'white' : CONFIG.colors.text;
-        toneButton.style.cursor = 'pointer';
-        toneButton.style.transition = 'all 0.2s ease';
+    // Create Apple-style segmented control
+    const segmentedControl = document.createElement('div');
+    segmentedControl.style.display = 'flex';
+    segmentedControl.style.backgroundColor = CONFIG.colors.systemFill;
+    segmentedControl.style.borderRadius = CONFIG.cornerRadius.medium;
+    segmentedControl.style.padding = '3px';
+    segmentedControl.style.width = '100%';
+    
+    CONFIG.tones.forEach((tone, index) => {
+        const segment = document.createElement('button');
+        segment.textContent = `${tone.icon} ${tone.label}`;
+        segment.dataset.tone = tone.id;
+        segment.style.flex = '1';
+        segment.style.padding = '8px 12px';
+        segment.style.border = 'none';
+        segment.style.borderRadius = '7px';
+        segment.style.backgroundColor = appState.selectedTone === tone.id ? tone.color : 'transparent';
+        segment.style.color = appState.selectedTone === tone.id ? 'white' : CONFIG.colors.text;
+        segment.style.cursor = 'pointer';
+        segment.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+        segment.style.fontSize = CONFIG.typography.subhead;
+        segment.style.fontWeight = '500';
+        segment.style.textAlign = 'center';
+        segment.style.whiteSpace = 'nowrap';
+        segment.style.overflow = 'hidden';
+        segment.style.textOverflow = 'ellipsis';
+        segment.style.webkitAppearance = 'none';
+        segment.style.fontFamily = 'inherit';
         
-        toneButton.addEventListener('click', () => {
+        segment.addEventListener('click', () => {
             appState.selectedTone = tone.id;
             document.querySelectorAll('[data-tone]').forEach(btn => {
-                btn.style.backgroundColor = btn.dataset.tone === tone.id ? CONFIG.colors.primary : 'white';
+                const currentTone = CONFIG.tones.find(t => t.id === btn.dataset.tone);
+                btn.style.backgroundColor = btn.dataset.tone === tone.id ? currentTone.color : 'transparent';
                 btn.style.color = btn.dataset.tone === tone.id ? 'white' : CONFIG.colors.text;
             });
         });
         
-        toneButtonsContainer.appendChild(toneButton);
+        segmentedControl.appendChild(segment);
     });
     
+    toneButtonsContainer.appendChild(segmentedControl);
     toneMenuContainer.appendChild(toneButtonsContainer);
     container.appendChild(toneMenuContainer);
 
-    // Info Panel
+    // Info Panel with Apple-style cards
     const infoPanel = document.createElement('div');
     infoPanel.style.width = '100%';
     infoPanel.style.display = 'flex';
     infoPanel.style.flexDirection = 'column';
-    infoPanel.style.gap = '15px';
+    infoPanel.style.gap = CONFIG.spacing.medium;
     container.appendChild(infoPanel);
 
-    // Prediction Display
+    // Prediction Display with Apple-style callout
+    const predictionCard = document.createElement('div');
+    predictionCard.style.backgroundColor = CONFIG.colors.cardBackground;
+    predictionCard.style.borderRadius = CONFIG.cornerRadius.medium;
+    predictionCard.style.padding = CONFIG.spacing.medium;
+    predictionCard.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+    
+    const predictionHeader = document.createElement('div');
+    predictionHeader.textContent = 'Current Gesture';
+    predictionHeader.style.fontWeight = '600';
+    predictionHeader.style.fontSize = CONFIG.typography.subhead;
+    predictionHeader.style.color = CONFIG.colors.secondaryText;
+    predictionHeader.style.marginBottom = CONFIG.spacing.small;
+    predictionCard.appendChild(predictionHeader);
+    
     const predictionDisplay = document.createElement('div');
     predictionDisplay.id = 'prediction';
-    predictionDisplay.style.backgroundColor = CONFIG.colors.primary;
-    predictionDisplay.style.color = 'white';
-    predictionDisplay.style.padding = '15px';
-    predictionDisplay.style.borderRadius = '10px';
-    predictionDisplay.style.fontSize = '18px';
+    predictionDisplay.style.color = CONFIG.colors.primary;
+    predictionDisplay.style.fontSize = CONFIG.typography.headline;
+    predictionDisplay.style.fontWeight = '600';
     predictionDisplay.style.textAlign = 'center';
     predictionDisplay.textContent = 'Waiting for gesture...';
-    infoPanel.appendChild(predictionDisplay);
+    predictionCard.appendChild(predictionDisplay);
+    
+    infoPanel.appendChild(predictionCard);
 
-    // Time Display
+    // Time Display with Apple-style caption
+    const timeCard = document.createElement('div');
+    timeCard.style.backgroundColor = CONFIG.colors.cardBackground;
+    timeCard.style.borderRadius = CONFIG.cornerRadius.medium;
+    timeCard.style.padding = CONFIG.spacing.medium;
+    timeCard.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+    
+    const timeHeader = document.createElement('div');
+    timeHeader.textContent = 'Processing Time';
+    timeHeader.style.fontWeight = '600';
+    timeHeader.style.fontSize = CONFIG.typography.subhead;
+    timeHeader.style.color = CONFIG.colors.secondaryText;
+    timeHeader.style.marginBottom = CONFIG.spacing.small;
+    timeCard.appendChild(timeHeader);
+    
     const timeDisplay = document.createElement('div');
     timeDisplay.id = 'timeTaken';
-    timeDisplay.style.backgroundColor = 'rgba(0,0,0,0.05)';
-    timeDisplay.style.padding = '15px';
-    timeDisplay.style.borderRadius = '10px';
-    timeDisplay.style.fontSize = '16px';
+    timeDisplay.style.color = CONFIG.colors.text;
+    timeDisplay.style.fontSize = CONFIG.typography.body;
     timeDisplay.style.textAlign = 'center';
-    timeDisplay.textContent = 'Processing time will appear here';
-    infoPanel.appendChild(timeDisplay);
+    timeDisplay.textContent = '—';
+    timeCard.appendChild(timeDisplay);
+    
+    infoPanel.appendChild(timeCard);
 
-    // Sentence Display
-    const sentenceDisplay = document.createElement('div');
-    sentenceDisplay.id = 'sentence';
-    sentenceDisplay.style.backgroundColor = CONFIG.colors.accent;
-    sentenceDisplay.style.color = 'white';
-    sentenceDisplay.style.padding = '20px';
-    sentenceDisplay.style.borderRadius = '10px';
-    sentenceDisplay.style.fontSize = '18px';
-    sentenceDisplay.style.textAlign = 'center';
-    sentenceDisplay.style.minHeight = '100px';
-    sentenceDisplay.style.display = 'flex';
-    sentenceDisplay.style.flexDirection = 'column';
-    sentenceDisplay.style.gap = '10px';
-    sentenceDisplay.innerHTML = `
-        <div style="font-weight: bold;">Building Sentence</div>
-        <div id="current-sentence" style="font-size: 1.2em;"></div>
-        <div style="font-weight: bold; margin-top: 10px;">Sentence History</div>
-        <div id="sentence-history" style="display: flex; flex-direction: column; gap: 5px;"></div>
-    `;
-    infoPanel.appendChild(sentenceDisplay);
+    // Sentence Display with Apple-style list
+    const sentenceCard = document.createElement('div');
+    sentenceCard.style.backgroundColor = CONFIG.colors.cardBackground;
+    sentenceCard.style.borderRadius = CONFIG.cornerRadius.medium;
+    sentenceCard.style.padding = CONFIG.spacing.medium;
+    sentenceCard.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+    
+    const sentenceHeader = document.createElement('div');
+    sentenceHeader.textContent = 'Sentence Builder';
+    sentenceHeader.style.fontWeight = '600';
+    sentenceHeader.style.fontSize = CONFIG.typography.subhead;
+    sentenceHeader.style.color = CONFIG.colors.secondaryText;
+    sentenceHeader.style.marginBottom = CONFIG.spacing.small;
+    sentenceCard.appendChild(sentenceHeader);
+    
+    const currentSentenceContainer = document.createElement('div');
+    currentSentenceContainer.style.marginBottom = CONFIG.spacing.medium;
+    
+    const currentSentenceLabel = document.createElement('div');
+    currentSentenceLabel.textContent = 'Current';
+    currentSentenceLabel.style.fontWeight = '500';
+    currentSentenceLabel.style.fontSize = CONFIG.typography.footnote;
+    currentSentenceLabel.style.color = CONFIG.colors.secondaryText;
+    currentSentenceLabel.style.marginBottom = '4px';
+    currentSentenceContainer.appendChild(currentSentenceLabel);
+    
+    const currentSentenceEl = document.createElement('div');
+    currentSentenceEl.id = 'current-sentence';
+    currentSentenceEl.style.fontSize = CONFIG.typography.body;
+    currentSentenceEl.style.color = CONFIG.colors.text;
+    currentSentenceEl.style.minHeight = '24px';
+    currentSentenceContainer.appendChild(currentSentenceEl);
+    
+    sentenceCard.appendChild(currentSentenceContainer);
+    
+    // Separator
+    const separator = document.createElement('div');
+    separator.style.height = '1px';
+    separator.style.backgroundColor = CONFIG.colors.separator;
+    separator.style.margin = `${CONFIG.spacing.medium} 0`;
+    sentenceCard.appendChild(separator);
+    
+    const historyHeader = document.createElement('div');
+    historyHeader.textContent = 'History';
+    historyHeader.style.fontWeight = '600';
+    historyHeader.style.fontSize = CONFIG.typography.subhead;
+    historyHeader.style.color = CONFIG.colors.secondaryText;
+    historyHeader.style.marginBottom = CONFIG.spacing.small;
+    sentenceCard.appendChild(historyHeader);
+    
+    const historyContainer = document.createElement('div');
+    historyContainer.id = 'sentence-history';
+    historyContainer.style.display = 'flex';
+    historyContainer.style.flexDirection = 'column';
+    historyContainer.style.gap = CONFIG.spacing.medium;
+    sentenceCard.appendChild(historyContainer);
+    
+    infoPanel.appendChild(sentenceCard);
 }
 
 // Set up Three.js scene
@@ -335,11 +491,13 @@ function startDataCollection() {
             appState.startTime = Date.now();
         }
         
+        // Store all sensor data including orientation (for visualization)
+        // But we'll only send the first 9 values (excluding orientation) to backend
         appState.sensorDataBuffer.push([
             ...appState.sensorData.acceleration,
             ...appState.sensorData.gravity,
             ...appState.sensorData.angularVelocity,
-            ...appState.sensorData.orientation.slice(0, 3)
+            ...appState.sensorData.orientation.slice(0, 3)  // only used for visualization
         ]);
 
         if (appState.sensorDataBuffer.length >= CONFIG.sequenceLength) {
@@ -348,13 +506,22 @@ function startDataCollection() {
     }, 20);
 }
 
-// Process collected sensor data
+// Process collected sensor data (excluding orientation)
 function processDataBuffer() {
     appState.isCollectingData = false;
     const timeTaken = (Date.now() - appState.startTime) / 1000;
-    document.getElementById('timeTaken').textContent = `Processed in: ${timeTaken.toFixed(2)}s`;
+    document.getElementById('timeTaken').textContent = `${timeTaken.toFixed(2)}s`;
     
-    sendDataToFlask(appState.sensorDataBuffer.slice(0, CONFIG.sequenceLength));
+    // Only send acceleration, gravity, and angular velocity (9 values per frame)
+    const dataToSend = appState.sensorDataBuffer.slice(0, CONFIG.sequenceLength).map(frame => {
+        return [
+            frame[0], frame[1], frame[2],  // acceleration x,y,z
+            frame[3], frame[4], frame[5],  // gravity x,y,z
+            frame[6], frame[7], frame[8]   // angular velocity x,y,z
+        ];
+    });
+    
+    sendDataToFlask(dataToSend.flat());
     appState.sensorDataBuffer = [];
     setTimeout(() => { appState.isCollectingData = true; }, 1000);
 }
@@ -365,7 +532,7 @@ async function sendDataToFlask(dataToSend) {
         const response = await fetch(`${CONFIG.apiEndpoint}/predict`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sensor_data: dataToSend.flat() })
+            body: JSON.stringify({ sensor_data: dataToSend })
         });
 
         const data = await response.json();
@@ -381,7 +548,7 @@ async function sendDataToFlask(dataToSend) {
 // Handle prediction results
 function handlePrediction(prediction) {
     clearTimeout(appState.inactivityTimer);
-    document.getElementById('prediction').textContent = `Current Gesture: ${prediction}`;
+    document.getElementById('prediction').textContent = prediction;
 
     if (prediction === "no gesture") {
         appState.inactivityTimer = setTimeout(finalizeSentence, CONFIG.inactivityTimeout);
@@ -398,76 +565,59 @@ function updateSentenceDisplay() {
     currentSentenceEl.textContent = appState.currentSentence.join(' ');
 }
 
-// Finalize the current sentence and send for grammar correction
-async function finalizeSentence() {
-    if (appState.currentSentence.length > 0) {
-        const originalSentence = appState.currentSentence.join(' ');
-        
-        try {
-            const response = await fetch(`${CONFIG.apiEndpoint}/enhance-text`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    text: originalSentence,
-                    tone: appState.selectedTone
-                })
-            });
-            
-            const result = await response.json();
-            
-            if (result.error) {
-                throw new Error(result.error);
-            }
-            
-            addToHistory(
-                originalSentence, 
-                result.grammar_corrected, 
-                result.tone_adjusted
-            );
-            
-            speak(result.tone_adjusted);
-            
-        } catch (error) {
-            console.error('Text enhancement failed:', error);
-            addToHistory(originalSentence, originalSentence, originalSentence);
-            speak(originalSentence);
+// ElevenLabs text-to-speech function
+async function speak(text) {
+    if (!text.trim() || appState.isSpeaking) return;
+    appState.isSpeaking = true;
+    
+    try {
+        const response = await fetch(`${CONFIG.elevenLabs.apiEndpoint}/${CONFIG.elevenLabs.voiceId}`, {
+            method: 'POST',
+            headers: {
+                'xi-api-key': CONFIG.elevenLabs.apiKey,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                text: text,
+                model_id: CONFIG.elevenLabs.modelId,
+                voice_settings: {
+                    stability: 0.5,
+                    similarity_boost: 0.75,
+                    ...(appState.selectedTone === 'professional' && { stability: 0.7, similarity_boost: 0.8 }),
+                    ...(appState.selectedTone === 'persuasive' && { stability: 0.6, similarity_boost: 0.85 }),
+                    ...(appState.selectedTone === 'casual' && { stability: 0.4, similarity_boost: 0.7 })
+                }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`ElevenLabs API error: ${response.status}`);
         }
+
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
         
-        appState.currentSentence = [];
-        updateSentenceDisplay();
+        audio.addEventListener('ended', () => {
+            appState.isSpeaking = false;
+        });
+        
+        audio.addEventListener('error', () => {
+            appState.isSpeaking = false;
+            fallbackSpeak(text);
+        });
+        
+        audio.play();
+    } catch (error) {
+        console.error('Error with ElevenLabs TTS:', error);
+        appState.isSpeaking = false;
+        fallbackSpeak(text);
     }
 }
 
-// Add sentence to history display
-function addToHistory(original, corrected, enhanced) {
-    const historyItem = document.createElement('div');
-    historyItem.style.display = 'flex';
-    historyItem.style.flexDirection = 'column';
-    historyItem.style.gap = '5px';
-    historyItem.style.backgroundColor = 'rgb(153, 153, 255)';
-    historyItem.style.padding = '10px';
-    historyItem.style.borderRadius = '5px';
-    historyItem.style.marginBottom = '10px';
-    
-    historyItem.innerHTML = `
-        <div style="font-size: 0.9em; color: #000000;">Original: 
-            <span style="text-decoration: line-through;">${original}</span>
-        </div>
-        <div style="font-size: 0.9em; color: #595959;">Grammar corrected: 
-            <span>${corrected}</span>
-        </div>
-        <div style="font-size: 1em; font-weight: bold;">Enhanced (${appState.selectedTone}): 
-            <span style="color: #fff;">${enhanced}</span>
-        </div>
-    `;
-    
-    document.getElementById('sentence-history').prepend(historyItem);
-    appState.sentenceHistory.push({ original, corrected, enhanced });
-}
-
-// Text-to-speech function
-function speak(text) {
-    if (!window.speechSynthesis || !text.trim()) return;
+// Fallback to browser speech synthesis
+function fallbackSpeak(text) {
+    if (!window.speechSynthesis) return;
     
     speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -482,10 +632,6 @@ function speak(text) {
             utterance.rate = 1.1;
             utterance.pitch = 1.1;
             break;
-        case 'excited':
-            utterance.rate = 1.2;
-            utterance.pitch = 1.2;
-            break;
         case 'casual':
             utterance.rate = 1.0;
             utterance.pitch = 1.0;
@@ -495,7 +641,134 @@ function speak(text) {
             utterance.pitch = 1.0;
     }
     
+    utterance.addEventListener('end', () => {
+        appState.isSpeaking = false;
+    });
+    
     speechSynthesis.speak(utterance);
+}
+
+// Finalize the current sentence and send for grammar correction
+async function finalizeSentence() {
+    if (appState.currentSentence.length === 0 || appState.isSpeaking) return;
+    
+    const originalSentence = appState.currentSentence.join(' ');
+    
+    try {
+        const response = await fetch(`${CONFIG.apiEndpoint}/enhance-text`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                text: originalSentence,
+                tone: appState.selectedTone
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.error) {
+            throw new Error(result.error);
+        }
+        
+        addToHistory(
+            originalSentence, 
+            result.grammar_corrected, 
+            result.tone_adjusted
+        );
+        
+        // Speak the enhanced text from Gemini
+        await speak(result.tone_adjusted);
+        
+    } catch (error) {
+        console.error('Text enhancement failed:', error);
+        addToHistory(originalSentence, originalSentence, originalSentence);
+        await speak(originalSentence);
+    }
+    
+    appState.currentSentence = [];
+    updateSentenceDisplay();
+}
+
+// Add sentence to history display with Apple-style design
+function addToHistory(original, corrected, enhanced) {
+    const historyContainer = document.getElementById('sentence-history');
+    
+    // Check if this original sentence already exists in history
+    const existingIndex = appState.sentenceHistory.findIndex(
+        item => item.original === original
+    );
+    
+    if (existingIndex >= 0) {
+        // Update existing entry
+        const existingItem = appState.sentenceHistory[existingIndex];
+        existingItem.corrected = corrected;
+        existingItem.enhanced = enhanced;
+        
+        // Update the DOM element
+        const historyElements = historyContainer.children;
+        if (historyElements.length > existingIndex) {
+            historyElements[existingIndex].innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <div style="font-size: ${CONFIG.typography.footnote}; color: ${CONFIG.colors.secondaryText};">
+                        Original: <span style="text-decoration: line-through; color: ${CONFIG.colors.tertiaryText};">${original}</span>
+                    </div>
+                    <div style="font-size: ${CONFIG.typography.footnote}; color: ${CONFIG.colors.secondaryText};">
+                        Corrected: <span style="color: ${CONFIG.colors.text};">${corrected}</span>
+                    </div>
+                    <div style="font-size: ${CONFIG.typography.body}; font-weight: 500; color: ${CONFIG.colors.text}; margin-top: 4px;">
+                        <span style="color: ${CONFIG.tones.find(t => t.id === appState.selectedTone).color};">${enhanced}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Move to top if modified
+        if (existingIndex > 0) {
+            const itemToMove = appState.sentenceHistory.splice(existingIndex, 1)[0];
+            appState.sentenceHistory.unshift(itemToMove);
+            
+            const domItem = historyContainer.children[existingIndex];
+            historyContainer.insertBefore(domItem, historyContainer.firstChild);
+        }
+        
+        return;
+    }
+
+    // Create new history item with Apple-style design
+    const historyItem = document.createElement('div');
+    historyItem.style.display = 'flex';
+    historyItem.style.flexDirection = 'column';
+    historyItem.style.gap = '4px';
+    historyItem.style.backgroundColor = CONFIG.colors.cardBackground;
+    historyItem.style.padding = CONFIG.spacing.medium;
+    historyItem.style.borderRadius = CONFIG.cornerRadius.medium;
+    historyItem.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+    
+    historyItem.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: ${CONFIG.typography.footnote}; color: ${CONFIG.colors.secondaryText};">
+                Original: <span style="text-decoration: line-through; color: ${CONFIG.colors.tertiaryText};">${original}</span>
+            </div>
+            <div style="font-size: ${CONFIG.typography.footnote}; color: ${CONFIG.colors.secondaryText};">
+                Corrected: <span style="color: ${CONFIG.colors.text};">${corrected}</span>
+            </div>
+            <div style="font-size: ${CONFIG.typography.body}; font-weight: 500; color: ${CONFIG.colors.text}; margin-top: 4px;">
+                <span style="color: ${CONFIG.tones.find(t => t.id === appState.selectedTone).color};">${enhanced}</span>
+            </div>
+        </div>
+    `;
+    
+    // Add to beginning of history
+    historyContainer.insertBefore(historyItem, historyContainer.firstChild);
+    appState.sentenceHistory.unshift({ original, corrected, enhanced });
+    
+    // Limit history to last 5 items
+    if (appState.sentenceHistory.length > 5) {
+        appState.sentenceHistory = appState.sentenceHistory.slice(0, 5);
+        if (historyContainer.children.length > 5) {
+            historyContainer.removeChild(historyContainer.lastChild);
+        }
+    }
 }
 
 // Start the application
