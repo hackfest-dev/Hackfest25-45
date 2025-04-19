@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import numpy as np
@@ -6,25 +5,21 @@ from tensorflow.keras.models import load_model
 import os
 import requests
 from dotenv import load_dotenv
-import time
-from typing import Dict
+from typing import Dict, Any  # Added Any for type hints
 
 # Load environment variables
 load_dotenv()
-HF_API_TOKEN = os.getenv("HF_API_TOKEN")
-GEMINI_API_KEY = "AIzaSyCOk7MFwGHQHY8u6uCqD5wX684p-WB7F9w"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyCOk7MFwGHQHY8u6uCqD5wX684p-WB7F9w")
 
-# Load the pre-trained gesture model (trained on 9 features per frame)
+# Load the pre-trained gesture model
 model = load_model('AI_model/model.h5')
 unique_labels = ["hello", "thank you", "no gesture", "what", "your", "name"]
 
 # Constants
-SEQUENCE_LENGTH = 120  # Length of sequences for prediction
+SEQUENCE_LENGTH = 120
 FEATURES_PER_FRAME = 9  # accel (3) + gravity (3) + angular velocity (3)
 
 app = Flask(__name__)
-
-# Configure CORS
 CORS(app, resources={r"/*": {"origins": "*", "methods": ["POST"], "allow_headers": ["Content-Type"]}})
 
 class GeminiEnhancer:
@@ -34,150 +29,110 @@ class GeminiEnhancer:
 
         self.system_prompt = """
         You are a helpful language assistant. Your job is to improve the clarity, grammar, and tone of short texts.
-
         Instructions:
         - First, correct any spelling or grammatical issues.
-        - Then, if requested, rewrite the sentence using the specified tone.
+        - Then, rewrite the sentence using the specified tone.
         - Do not add or remove meaning from the original text.
-        - Only respond with the corrected or rewritten sentence, no explanations.
+        - Only respond with the corrected sentence, no explanations.
         """.strip()
 
         self.tone_prompts = {
             "FRIENDLY": "Make this sound friendly and approachable: ",
-            "PROFESSIONAL": "Make this sound formal and professional for business communication: ",
+            "PROFESSIONAL": "Make this sound formal and professional: ",
             "CASUAL": "Make this sound casual and conversational: ",
-            "PERSUASIVE": "Make this more persuasive and compelling: ",
-            "ANGRY": "Make this sound angry and frustrated: ",
-            "EXCITED": "Make this sound excited and enthusiastic: ",
-            "SARCASTIC": "Make this sound sarcastic and ironic: "
+            "PERSUASIVE": "Make this more persuasive and compelling: "
         }
 
-    def enhance_text(self, text: str, tone: str = "FRIENDLY") -> Dict:
+    def enhance_text(self, text: str, tone: str = "FRIENDLY") -> Dict[str, Any]:
         if not text.strip():
-            return {"error": "Input is empty", "original": text}
+            return {"error": "Input is empty", "success": False}
 
-        # Normalize the tone input
         tone = tone.upper()
         if tone not in self.tone_prompts:
             tone = "FRIENDLY"
 
-        # Step 1: Grammar correction
-        grammar_prompt = f"Correct grammar and improve clarity while keeping the original meaning:\n{text}"
-        grammar_result = self._call_gemini(grammar_prompt)
-        if not grammar_result["success"]:
-            return {"error": grammar_result["error"], "original": text}
-
-        grammar_corrected = grammar_result["output"]
-
-        # Step 2: Tone adjustment
-        tone_instruction = self.tone_prompts.get(tone, self.tone_prompts["FRIENDLY"])
-        tone_prompt = f"{tone_instruction}{grammar_corrected}"
-        tone_result = self._call_gemini(tone_prompt)
-        if not tone_result["success"]:
+        # Combined grammar correction and tone adjustment in one step
+        prompt = f"{self.system_prompt}\n\nOriginal text: {text}\nPlease correct grammar and make it {tone.lower()}:"
+        
+        try:
+            result = self._call_gemini(prompt)
+            if not result["success"]:
+                return result
+            
             return {
-                "error": tone_result["error"],
                 "original": text,
-                "grammar_corrected": grammar_corrected
+                "enhanced": result["output"],
+                "success": True
+            }
+            
+        except Exception as e:
+            return {
+                "error": f"Enhancement failed: {str(e)}",
+                "success": False
             }
 
-        return {
-            "original": text,
-            "grammar_corrected": grammar_corrected,
-            "tone_adjusted": tone_result["output"],
-            "success": True
-        }
-
-    def _call_gemini(self, prompt: str) -> Dict:
+    def _call_gemini(self, prompt: str) -> Dict[str, Any]:
         try:
             response = requests.post(
                 f"{self.endpoint}?key={self.api_key}",
                 headers={"Content-Type": "application/json"},
                 json={
-                    "contents": [
-                        {
-                            "role": "user",
-                            "parts": [{"text": self.system_prompt}]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [{"text": prompt}]
-                        }
-                    ]
+                    "contents": [{
+                        "parts": [{"text": prompt}]
+                    }]
                 },
                 timeout=15
             )
-
-            if response.status_code == 200:
-                output = response.json()["candidates"][0]["content"]["parts"][0]["text"]
-                return {"success": True, "output": output.strip()}
-            else:
-                return {
-                    "success": False,
-                    "error": f"API error {response.status_code}: {response.text}"
-                }
-
+            response.raise_for_status()
+            
+            output = response.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+            return {"success": True, "output": output}
+            
         except requests.RequestException as e:
             return {"success": False, "error": str(e)}
 
-# Initialize the enhancer
 text_enhancer = GeminiEnhancer()
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    """Endpoint for gesture prediction (using only 9 features per frame)"""
+    """Gesture prediction endpoint"""
     data = request.get_json()
-    new_data = data.get('sensor_data', [])
-
-    expected_length = SEQUENCE_LENGTH * FEATURES_PER_FRAME
-    if len(new_data) != expected_length:
-        return jsonify({"error": f"Invalid data format, expected {expected_length} values, got {len(new_data)}."}), 400
+    sensor_data = data.get('sensor_data', [])
     
-    # Reshape to (1, SEQUENCE_LENGTH, 9)
-    data_buffer = np.array(new_data).reshape((1, SEQUENCE_LENGTH, FEATURES_PER_FRAME))
-
+    if len(sensor_data) != SEQUENCE_LENGTH * FEATURES_PER_FRAME:
+        return jsonify({"error": f"Expected {SEQUENCE_LENGTH * FEATURES_PER_FRAME} values, got {len(sensor_data)}"}), 400
+    
     try:
+        data_buffer = np.array(sensor_data).reshape((1, SEQUENCE_LENGTH, FEATURES_PER_FRAME))
         prediction = model.predict(data_buffer)
-        predicted_class = np.argmax(prediction, axis=1)
-        result = unique_labels[predicted_class[0]]
-        return jsonify({"prediction": result})
-
+        predicted_class = unique_labels[np.argmax(prediction)]
+        return jsonify({"prediction": predicted_class})
     except Exception as e:
-        return jsonify({"error": f"Error in prediction: {str(e)}"}), 500
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/enhance-text', methods=['POST'])
-def enhance_text():
-    """Enhanced text processing with grammar correction and tone adjustment"""
+def handle_enhance_text():
+    """Enhanced text processing endpoint"""
     data = request.get_json()
-    text = data.get('text', '')
+    text = data.get('text', '').strip()
     tone = data.get('tone', 'FRIENDLY').upper()
     
     if not text:
         return jsonify({"error": "No text provided"}), 400
     
-    try:
-        result = text_enhancer.enhance_text(text, tone)
-        
-        if result.get("error"):
-            return jsonify({
-                "error": result["error"],
-                "original_text": text,
-                "grammar_corrected": text,
-                "tone_adjusted": text
-            }), 500
-            
+    result = text_enhancer.enhance_text(text, tone)
+    if not result.get("success"):
         return jsonify({
-            "original": result["original"],
-            "tone_adjusted": result["tone_adjusted"],
-            "grammar_corrected": text,
-            "success": True
-        })
-    except Exception as e:
-        return jsonify({
-            "error": f"Text enhancement failed: {str(e)}",
-
-            "grammar_corrected": text,
-            "tone_adjusted": text
-        }), 500
+            "error": result.get("error", "Enhancement failed"),
+            "original": text,
+            "success": False
+        }), 400
+    
+    return jsonify({
+        "original": result["original"],
+        "enhanced": result["enhanced"],
+        "success": True
+    })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
