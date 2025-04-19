@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model with Sensor Data</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/touch-sdk@0.5.2/dist/main.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.150.0/build/three.module.js",
+                "GLTFLoader": "https://cdn.jsdelivr.net/npm/three@0.150.0/examples/jsm/loaders/GLTFLoader.js"
+            }
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <a href="#" class="logo" id="logo">HANDSPEAKS</a>
+        <nav>
+            <ul class="navigation">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="training.html">Training</a></li>
+                <li><a href="trck.html" class="active">Tracking</a></li>
+                <li><a href="tutorials.html">Tutorials</a></li>
+                <li><a href="team.html">Our Team</a></li>
+            </ul>
+        </nav>
+        <div class="search-container">
+            <input type="text" placeholder="Search..." class="search-input">
+            <button class="search-button">
+                <ion-icon name="search-outline"></ion-icon>
+            </button>
+        </div>
+        <div id="connect-button-container"></div> <!-- Add this container for the connection button -->
+    </header>
+
+    <main id="main-content"></main> <!-- Main content container -->
+
+    <script>
+        const logo = document.getElementById('logo');
+        logo.addEventListener('click', function() {
+            document.body.classList.toggle('dark-theme');
+        });
+    </script>
+    <script type="module" src="trck.js"></script>
+</body>
+</html>

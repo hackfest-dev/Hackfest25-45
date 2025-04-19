@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handspeaks Project</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="over.css">
+    <link rel="stylesheet" href="tail.css">
+    <!-- <link rel="icon" href="./favicon-32x32.png" type="image/png"> -->
+    <link rel="icon" href="../images/favicon-32x32.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+
+<body>
+    <header>
+        <a href="#" class="logo" id="logo">HANDSPEAKS</a>
+        <nav>
+            <ul class="navigation">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="training.html">Training</a></li>
+                <li><a href="trck.html">Tracking</a></li>
+                <li><a href="tutorials.html">Tutorials</a></li>
+                <li><a href="team.html">Our Team</a></li>
+            </ul>
+        </nav>
+        <div class="search-container">
+            <input type="text" placeholder="Search..." class="search-input">
+            <button class="search-button">
+                <ion-icon name="search-outline"></ion-icon>
+            </button>
+        </div>
+    </header>
+
+
+    <section class="hero">
+        <video autoplay muted loop id="bg-video">
+            <source src="videohome.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="hero-content">
+            <h1 class="dynamic-text" id="dynamic-text1">Hand Gesture Recognition Using Smartwatch</h1>
+            <p class="dynamic-text" id="dynamic-text2">Control technology with just your hands. Intuitive, seamless, and
+                smart.</p>
+            <p class="dynamic-text" id="dynamic-text3">Train and test the gesture recognition model for accuracy.</p>
+            <a href="tutorials.html" class="tutorial-link">
+                <button class="tutorial-button">
+                    Watch the Tutorials
+                    <span class="icon-container">
+                        <ion-icon name="arrow-forward-outline"></ion-icon>
+                    </span>
+                </button>
+            </a>
+        </div>
+    </section>
+
+
+    <section class="overview">
+        <div class="overview-layout">
+
+            <div class="overview-text">
+                <p>Welcome to Handspeaks – the smartwatch that turns your hand gestures into seamless control over your
+                    devices. No buttons, no screens – just you and your movement.</p>
+                <p>Powered by cutting-edge AI and sensors, Handspeaks learns from your gestures, getting smarter with
+                    every use, making technology effortless and intuitive.</p>
+                <p>Transform your gestures into commands! With Handspeaks, your smartwatch becomes a bridge to
+                    effortless control and seamless interaction. Step into the future, one gesture at a time!</p>
+
+            </div>
+
+
+            <div class="vertical-line"></div>
+
+            <div class="overview-title">
+                <h2>Overview of the Project</h2>
+            </div>
+        </div>
+    </section>
+
+
+
+    <section class="model-training">
+        <div class="container">
+            <h1>How We Trained the Model</h1>
+            <div class="flowchart">
+                <div class="flowchart-step">
+                    <div class="flowchart-step-icon">
+                        <i style="font-size: 35px; color: #fff;" class="fa">&#xf293;</i>
+                    </div>
+                    <div class="flowchart-step-content">
+                        <h3>Connect to Bluetooth</h3>
+                        <p>Pair the smartwatch to the system to establish a connection.</p>
+                    </div>
+                    <div class="details-panel">
+                        <button class="details-panel-close">&times;</button>
+                        <div class="details-panel-content">
+                            <h4>Details:</h4>
+                            <p>We connected the smartwatch using Bluetooth through the Touch SDK. This established a
+                                seamless and stable connection, enabling efficient real-time data communication between
+                                the smartwatch and the system.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flowchart-step">
+                    <div class="flowchart-step-icon">
+                        <i class="fas fa-rss"></i>
+                    </div>
+                    <div class="flowchart-step-content">
+                        <h3>Collect Motion Sensor Data</h3>
+                        <p>Capture real-time motion data from the smartwatch sensors for training.</p>
+                    </div>
+                    <div class="details-panel">
+                        <button class="details-panel-close">&times;</button>
+                        <div class="details-panel-content">
+                            <h4>Details:</h4>
+                            <ul>
+                                <li><strong>Acceleration:</strong> Capture 3D acceleration data (X, Y, Z) to measure
+                                    changes in velocity.</li>
+                                <li><strong>Gravity:</strong> Track gravitational forces affecting the smartwatch for
+                                    stability analysis.</li>
+                                <li><strong>Angular Velocity:</strong> Record rotational movements using gyroscopic
+                                    data.</li>
+                                <li><strong>Orientation:</strong> Determine the smartwatch’s orientation using
+                                    magnetometer readings and coordinate transformations.</li>
+                            </ul>
+                            <p>All data is sent to the model for further processing and classification.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flowchart-step">
+                    <div class="flowchart-step-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="flowchart-step-content">
+                        <h3>Preprocess the Data</h3>
+                        <p>Normalize and clean the raw data to ensure accuracy during training.</p>
+                    </div>
+                    <div class="details-panel">
+                        <button class="details-panel-close">&times;</button>
+                        <div class="details-panel-content">
+                            <h4>Details:</h4>
+                            <p>Remove noise, normalize sensor data, and prepare it for feature extraction. Ensure data
+                                quality for effective model training.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flowchart-step">
+                    <div class="flowchart-step-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="flowchart-step-content">
+                        <h3>Train the Model</h3>
+                        <p>Use machine learning algorithms to classify and label the gestures.</p>
+                    </div>
+                    <div class="details-panel">
+                        <button class="details-panel-close">&times;</button>
+                        <div class="details-panel-content">
+                            <h4>Details:</h4>
+                            <p>We use an LSTM (Long Short-Term Memory) Recurrent Neural Network to process sequential
+                                motion data. The LSTM model efficiently captures temporal dependencies and learns
+                                patterns to accurately recognize specific gestures.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flowchart-step">
+                    <div class="flowchart-step-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="flowchart-step-content">
+                        <h3>Test and Recognize</h3>
+                        <p>Perform gestures to validate the model's recognition capabilities.</p>
+                    </div>
+                    <div class="details-panel">
+                        <button class="details-panel-close">&times;</button>
+                        <div class="details-panel-content">
+                            <h4>Details:</h4>
+                            <p>Perform gestures to validate the model's performance. The system processes real-time
+                                sensor data, predicts the corresponding text for the gesture, and then converts it to
+                                speech, providing an interactive feedback experience.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <section class="gesture-tracking">
+        <div class="container">
+
+            <h1>Track Gestures in Real-Time</h1>
+
+            <div class="gesture-video-container">
+                <video id="gesture-video" width="100%" muted>
+                    <source src="tracking.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <button id="play-button">
+                    <i class="fas fa-play-circle"></i>
+                </button>
+                <p>Watch how gestures are recognized in real-time.</p>
+            </div>
+        </div>
+    </section>
+
+
+
+    <section class="contact-us">
+        <div class="container">
+      
+            <h1>Contact Us</h1>
+
+          
+            <div class="contact-info">
+                <div class="person">
+                    <h3>Dharshan SN</h3>
+                    <p>Email: <a href="dharshansn.is23@rvce.edu.in">dharshansn.is23@rvce.edu.in</a></p>
+                </div>
+                <div class="person">
+                    <h3>Ankit Pathak</h3>
+                    <p>Email: <a href="ankitpathak.is23@rvce.edu.in">ankitpathak.is23@rvce.edu.in</a></p>
+                </div>
+            </div>
+
+           
+            <div class="suggest-box">
+                <h2>Suggest Us</h2>
+                <p>We value your feedback! Share your suggestions below:</p>
+                <form id="suggestion-form">
+                    <textarea name="suggestion" id="suggestion" rows="5" placeholder="Type your suggestion here..."
+                        required></textarea>
+                    <button type="submit" class="send-button">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+
+
+            
+            <div class="social-media">
+                <h2>Follow Us</h2>
+                <a href="https://www.instagram.com/yourprofile" target="_blank">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://github.com/yourprofile" target="_blank">
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+
+    <script>
+        document.getElementById("suggestion-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const suggestion = document.getElementById("suggestion").value;
+            alert("Thank you for your suggestion: " + suggestion);
+            document.getElementById("suggestion").value = ""; // Clear the textarea
+        });
+    </script>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+    <script>
+        
+        const playButton = document.getElementById('play-button');
+        const video = document.getElementById('gesture-video');
+
+        playButton.addEventListener('click', () => {
+            video.play();
+            playButton.style.display = 'none'; // Hide the button once the video starts
+        });
+    </script>
+    <script src="script.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</body>
+
+</html>

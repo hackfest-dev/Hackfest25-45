@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorials - Handspeaks</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .video-tutorials {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .video-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .video-card:hover {
+            transform: scale(1.05);
+        }
+
+        .video-card video {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        .video-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            text-align: center;
+            /* Centers the text */
+        }
+
+        .video-card p {
+            margin: 10px 0 0;
+            font-size: 14px;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="#" class="logo">HANDSPEAKS</a>
+        <nav>
+            <ul class="navigation">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="training.html">Training</a></li>
+                <li><a href="trck.html">Tracking</a></li>
+                <li><a href="tutorials.html" class="active">Tutorials</a></li>
+                <li><a href="team.html">Our Team</a></li>
+            </ul>
+        </nav>
+        <div class="search-container">
+            <input type="text" placeholder="Search..." class="search-input">
+            <button class="search-button">
+                <ion-icon name="search-outline"></ion-icon>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section class="project-details">
+            <h2>Tutorials</h2>
+            <p>Watch tutorials to understand the full capabilities of the Handspeaks system.</p>
+        </section>
+
+        <section class="video-tutorials">
+            <div class="video-card">
+                <video muted loop preload="metadata" poster="thumbnail1.jpg">
+                    <source src="hello.mp4" type="video/mp4">
+                </video>
+                <p>Hello</p>
+            </div>
+            <div class="video-card">
+                <video muted loop preload="metadata" poster="thumbnail2.jpg">
+                    <source src="thank.mp4" type="video/mp4">
+                </video>
+                <p>Thank You</p>
+            </div>
+            <div class="video-card">
+                <video muted loop preload="metadata" poster="thumbnail3.jpg">
+                    <source src="what.mp4" type="video/mp4">
+                </video>
+                <p>What</p>
+            </div>
+            <div class="video-card">
+                <video muted loop preload="metadata" poster="thumbnail4.jpg">
+                    <source src="your.mp4" type="video/mp4">
+                </video>
+                <p> Your</p>
+            </div>
+            <div class="video-card">
+                <video muted loop preload="metadata" poster="thumbnail5.jpg">
+                    <source src="name.mp4" type="video/mp4">
+                </video>
+                <p>Name</p>
+            </div>
+        </section>
+
+
+    </main>
+
+    <script>
+        document.querySelectorAll('.video-card video').forEach(video => {
+            video.addEventListener('mouseenter', () => {
+                video.play();
+            });
+            video.addEventListener('mouseleave', () => {
+                video.pause();
+                video.currentTime = 0;
+            });
+        });
+    </script>
+
+</body>
+
+</html>
