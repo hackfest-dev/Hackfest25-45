@@ -47,7 +47,7 @@ class MyWatch(Watch):
 
         # Prepare the data in the desired format
         data = [
-            234,
+            235,
             elapsed_time,  # Elapsed time in seconds
             sensors.acceleration[0], sensors.acceleration[1], sensors.acceleration[2],  # Separate acceleration components
             sensors.gravity[0], sensors.gravity[1], sensors.gravity[2],  # Separate gravity components
