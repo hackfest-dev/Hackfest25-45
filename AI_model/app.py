@@ -11,7 +11,7 @@ from typing import Dict
 # Load environment variables
 load_dotenv()
 HF_API_TOKEN = os.getenv("HF_API_TOKEN")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_API_KEY = "AIzaSyCOk7MFwGHQHY8u6uCqD5wX684p-WB7F9w "
 
 # Load the pre-trained gesture model
 model = load_model('AI_model/model.h5')
